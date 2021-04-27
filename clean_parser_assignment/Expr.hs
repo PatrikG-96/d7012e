@@ -76,9 +76,9 @@ value (Var v) dict = case Dictionary.lookup v dict of Just y -> y; _ -> error (v
 value (Add e1 e2) dict = (value e1 dict) + (value e2 dict)
 value (Sub e1 e2) dict = (value e1 dict) - (value e2 dict)
 value (Mul e1 e2) dict = (value e1 dict) * (value e2 dict)
-value (Div e1 e2) dict = 
+value (Div e1 e2) dict
         | (value e2 dict) == 0 = error ("Division by zero!")
-        | otherwise = (value e1 dict) / (value e2 dict)
+        | otherwise = (value e1 dict) `div` (value e2 dict)
 
 instance Parse Expr where
     parse = expr

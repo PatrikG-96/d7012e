@@ -23,7 +23,7 @@ m -# n = m # n >-> snd
 m #- n = m # n >-> fst
 
 spaces :: Parser String
-spaces =  iter char ? (==" ")
+spaces = iter (char ? isSpace)
 
 token :: Parser a -> Parser a
 token m = m #- spaces
@@ -35,13 +35,14 @@ word :: Parser String
 word = token (letter # iter letter >-> cons)
 
 chars :: Int -> Parser String
-chars n =  char # chars (n-1)
+chars 0 = return []
+chars n =  char # chars (n-1) >-> cons
 
 accept :: String -> Parser String
 accept w = (token (chars (length w))) ? (==w)
 
 require :: String -> Parser String
-require w  = accept ? (==w)
+require w  = accept w ! err w
 
 lit :: Char -> Parser Char
 lit c = token char ? (==c)
