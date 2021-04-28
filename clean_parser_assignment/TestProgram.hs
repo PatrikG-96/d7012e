@@ -33,9 +33,22 @@ p1 = fromString  ("\
 \  end\
 \write s;")
 
+p2 = fromString ("\
+\read n;\
+\s := 0;\
+\  repeat\
+\    begin\
+\      s := s + n;\
+\      n := n - 1;\
+\    end\
+\  until (0-n)+1;\
+\write s;")
+
 sp = putStr (toString p1)
+sp1 = putStr (toString p2)
 
 rp = Program.exec p [3,16]
 
 rp1 = Program.exec p1 [1024, 2]
 
+rp2 = Program.exec p2 [10]
