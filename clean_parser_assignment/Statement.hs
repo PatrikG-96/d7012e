@@ -83,11 +83,15 @@ exec (While cond s : stmts) dict input =
         then exec (s:While cond s:stmts) dict input -- In order to keep the loop going, we need to do the condition check after the while statements
         else exec stmts dict input -- Just execute the rest
 
--- Same as while but we just execute the statement once when the check fails
+-- Execute statement, create a new If statement that checks the condition, if it's true, we should stop repeating so then statement is a Skip statement,
+-- the else statement is a new repeat statement that will do the same thing.
+-- Repeat becomes:
+-- 1 Repeat =
+-- 2 execute statement
+-- 3 If condition is true, stop, else go back to 1
 exec (Repeat s cond: stmts) dict input =
-    if (Expr.value cond dict) /= 0
-        then exec (s:Repeat s cond:stmts) dict input
-        else exec (s:stmts) dict input
+    exec (s:If cond Skip (Repeat s cond):stmts) dict input
+    
 
 instance Parse Statement where
   parse = skip ! read' ! write ! assignment ! if' ! while ! repeat' ! begin
@@ -98,15 +102,15 @@ instance Parse Statement where
 buildString :: T -> Int -> String
 buildString (Assignment var expr) i = (makeIndent i) ++ var ++ ":=" ++ toString expr ++ ";\n"
 buildString (Skip) i                = (makeIndent i) ++ "skip;\n"
-buildString (Write expr) i          = (makeIndent i) ++ "write " ++ toString expr ++ ";\n"
-buildString (If cond e1 e2) i       = (makeIndent i) ++ "if " ++ toString cond ++ " then\n" ++ (buildString e1 (i+2))++ 
-                                      (makeIndent i) ++ "else\n" ++ (buildString e2 (i+2))
-buildString (While cond stmt) i     = (makeIndent i) ++ "while " ++ toString cond ++ " do\n" ++ (buildString stmt (i+2))
-buildString (Begin stmts) i         = (makeIndent i) ++ "begin\n" ++ unwords_nospace[buildString s (i+2) | s <- stmts] ++ 
+buildString (Write expr) i          = (makeIndent i) ++ "write "   ++ toString expr ++ ";\n"
+buildString (If cond e1 e2) i       = (makeIndent i) ++ "if "      ++ toString cond ++ " then\n" ++ (buildString e1 (i+2))++ 
+                                      (makeIndent i) ++ "else\n"   ++ (buildString e2 (i+2))
+buildString (While cond stmt) i     = (makeIndent i) ++ "while "   ++ toString cond ++ " do\n" ++ (buildString stmt (i+2))
+buildString (Begin stmts) i         = (makeIndent i) ++ "begin\n"  ++ unwords_nospace[buildString s (i+2) | s <- stmts] ++ 
                                       (makeIndent i) ++ "end\n"
-buildString (Read var) i            = (makeIndent i) ++ "read " ++ var ++ ";\n"
+buildString (Read var) i            = (makeIndent i) ++ "read "    ++ var ++ ";\n"
 buildString (Repeat stmt cond) i    = (makeIndent i) ++ "repeat\n" ++ (buildString stmt (i+2)) ++ (makeIndent i) ++
-                                      "until " ++ toString cond ++ ";\n"
+                                      "until " ++ toString cond    ++ ";\n"
 
 makeIndent :: Int -> String
 makeIndent i = replicate i ' '

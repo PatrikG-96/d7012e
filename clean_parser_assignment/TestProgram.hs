@@ -51,4 +51,4 @@ rp = Program.exec p [3,16]
 
 rp1 = Program.exec p1 [1024, 2]
 
-rp2 = Program.exec p2 [10]
+rp2 = Program.exec p2 [5]

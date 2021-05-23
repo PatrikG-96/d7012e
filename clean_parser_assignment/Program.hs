@@ -15,7 +15,7 @@ instance Parse T where
 -- and then continue from where that statement ended, thus parsing the entire string into
 -- a list of statements
 program_parse = iter Statement.parse >-> makeProgram
-makeProgram = Program
+makeProgram slist = Program slist
 
 exec :: T -> [Integer] -> [Integer]
 exec (Program p) nums = Statement.exec p Dictionary.empty nums
